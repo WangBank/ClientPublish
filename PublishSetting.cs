@@ -66,7 +66,7 @@ namespace 自动发布dll程序
             }
            //更新到config文件
            configuration config = new configuration {
-               MaxSubVersion = MainVersion,
+               MaxSubVersion = MaxSubVersion,
                CurrVersion = currentlabel.Text,
                MinSubVersion = MinSubVersiontxt.Text,
                MainVersion = MainVersion,
@@ -79,7 +79,7 @@ namespace 自动发布dll程序
             StreamWriter sw = new StreamWriter("Publish.config");//这里写上你要保存的路径
             sw.WriteLine(xml);//按行写
             sw.Close();//关闭
-            this.Close();
+            this.DialogResult = DialogResult.OK;
         }
 
 

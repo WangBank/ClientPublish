@@ -27,7 +27,11 @@ namespace 自动发布dll程序
 
         private void PublishBtn_Click(object sender, EventArgs e)
         {
-
+            if (this.bdCountLbl.Text =="0")
+            {
+                MessageBox.Show("发布目录UpdateFiles下没有任何文件，不允许发布!");
+                return;
+            }
             configuration config = EventXml.Deserialize(typeof(configuration), LinqToXml.GetStringByXml("Publish.config")) as configuration;
             var maxsub = config.MaxSubVersion;
             var mainbb = config.MainVersion;
@@ -94,7 +98,15 @@ namespace 自动发布dll程序
         {
             PublishSetting publishSetting = new PublishSetting();
             publishSetting.StartPosition = FormStartPosition.CenterScreen;
-            publishSetting.Show();
+            if (publishSetting.ShowDialog() == DialogResult.OK)
+            {
+                paths = QueryPathsByFile();
+                var appxml = QueryElementsByFile();
+                string[] fileList = System.IO.Directory.GetFileSystemEntries("UpdateFiles");
+                this.editionLbl.Text = appxml.Element("MainVersion").Value + "." + appxml.Element("MinSubVersion").Value;
+                this.bdCountLbl.Text = fileList == null ? "0" : fileList.Length.ToString();
+            }
+            
         }
     }
 }

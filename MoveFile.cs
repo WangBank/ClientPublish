@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using static 自动发布dll程序.LinqToXml;
 
 namespace 自动发布dll程序
@@ -31,8 +32,12 @@ namespace 自动发布dll程序
                 // 如果你指向copy目标文件下面的文件而不包含目录请使用下面的方法
                 // string[] fileList = Directory.GetFiles（srcPath）；
                     //将当前目录下的server.xml改信息
-                    ServerSetting serverSetting = EventXml.Deserialize(typeof(ServerSetting), LinqToXml.GetStringByXml(oldAimpath + "\\bin\\server.xml")) as ServerSetting;
+                    
                     string[] fileList = System.IO.Directory.GetFileSystemEntries(srcPath);
+                if (fileList != null && fileList.Length!=0)
+                {
+                    ServerSetting serverSetting = EventXml.Deserialize(typeof(ServerSetting), LinqToXml.GetStringByXml(oldAimpath + "\\bin\\server.xml")) as ServerSetting;
+               
                     // 遍历所有的文件和目录
                     foreach (string file in fileList)
                     {
@@ -82,7 +87,8 @@ namespace 自动发布dll程序
                     string xml = xmlsss.Replace("xsi:type=\"xsd:string\"", "");
                     StreamWriter sw = new StreamWriter(oldAimpath + "\\bin\\server.xml");//这里写上你要保存的路径
                     sw.WriteLine(xml);//按行写
-                    sw.Close();//关闭
+                    sw.Close();//关闭 
+                }
                 
             }
             catch (Exception e)
@@ -96,7 +102,7 @@ namespace 自动发布dll程序
             var dirs = new FileInfo(srcPath);
             var dirname = dirs.FullName;
             var newName = $"{aimPath}\\{version}_{DateTime.Now.ToString("yyyyMMddHHmmss")}.zip";
-            CompressDirectory(dirname, newName, 5, false);
+            CompressDirectory(dirname, newName, 5, true);
         }
 
         /// <summary>
@@ -133,10 +139,35 @@ namespace 自动发布dll程序
             }
             if (deleteDir)
             {
-                Directory.Delete(dirPath, true);
+                DeleteFolder(dirPath);
+               // Directory.Delete(dirPath, true);
             }
         }
-
+        /// 清空指定的文件夹，但不bai删除文du件夹
+        /// </summary>
+        /// <param name="dir"></param>
+        public static void DeleteFolder(string dir)
+        {
+            foreach (string d in Directory.GetFileSystemEntries(dir))
+            {
+                if (File.Exists(d))
+                {
+                    FileInfo fi = new FileInfo(d);
+                    if (fi.Attributes.ToString().IndexOf("ReadOnly") != -1)
+                        fi.Attributes = FileAttributes.Normal;
+                    File.Delete(d);//直接删除其中的文件  
+                }
+                else
+                {
+                    DirectoryInfo d1 = new DirectoryInfo(d);
+                    if (d1.GetFiles().Length != 0)
+                    {
+                        DeleteFolder(d1.FullName);////递归删除子zhi文件夹
+                    }
+                    Directory.Delete(d);
+                }
+            }
+        }
         /// <summary>
         /// 获取所有文件
         /// </summary>
